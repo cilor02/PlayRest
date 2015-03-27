@@ -17,9 +17,23 @@ object Application extends Controller {
 import model.jsonTransformers.AccountWrites.accountWrites
  import model.jsonTransformers.AccountReads.accountReads
   def testJson = Action {
-    val account = Account("id1","mike","ilori","suffolk road","UK","essex","ig11","ilford","1986")
+    val account = Account("id1",
+      "milori@bmj.com",
+      "mr",
+      "mike",
+      "ilori",
+      "suffolk road",
+      "UK",
+      "essex",
+      "BBC",
+      "ig11",
+      "ilford",
+      "99990-009",
+      "1986")
 
-    val jsonString = """{"id":"id1","foreName":"michael","familyName":"whyte-ilori","address":"73 suffolk road","country":"GB","province":"essex","postalCode":"ig11","city":"ilford","graduationYear":"1986"}"""
+    val jsonString =
+      """{"id":"id1",
+        |"foreName":"michael","familyName":"whyte-ilori","address":"73 suffolk road","country":"GB","province":"essex","postalCode":"ig11","city":"ilford","graduationYear":"1986"}""".stripMargin
     val jsValue = Json.parse(jsonString)
     val account2 = jsValue.as[Account]
    // val jsonAccount = Json.toJson(account)(accountWrites)

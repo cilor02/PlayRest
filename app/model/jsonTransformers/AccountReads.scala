@@ -9,14 +9,20 @@ import play.api.libs.json.{Reads, JsPath}
  */
 object AccountReads {
   implicit val accountReads: Reads[Account] = (
-    (JsPath \ "id").read[String] and
-      (JsPath \ "foreName").read[String] and
-      (JsPath \ "familyName").read[String] and
-      (JsPath \ "address").read[String] and
+    (JsPath \ "id").readNullable[String] and
+      (JsPath \ "email").read[String](email) and
+      (JsPath \ "title").readNullable[String] and
+      (JsPath \ "foreName").readNullable[String] and
+      (JsPath \ "familyName").readNullable[String] and
+      (JsPath \ "address").readNullable[String] and
       (JsPath \ "country").read[String] and
-      (JsPath \ "province").read[String] and
-      (JsPath \ "postalCode").read[String] and
-      (JsPath \ "city").read[String] and
-      (JsPath \ "graduationYear").read[String]
+      (JsPath \ "province").readNullable[String] and
+      (JsPath \ "organisation").readNullable[String] and
+      (JsPath \ "postalCode").readNullable[String] and
+      (JsPath \ "city").readNullable[String] and
+      (JsPath \ "telephone").readNullable[String] and
+      (JsPath \ "graduationYear").readNullable[String] and
+      (JsPath \ "specialties").read[List[String]] and
+      (JsPath \ "professions").read[List[String]]
     )(Account.apply _)
 }
