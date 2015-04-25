@@ -11,15 +11,22 @@ object AccountWrites {
   import play.api.libs.functional.syntax._
 
   implicit val accountWrites: Writes[Account] = (
-    (JsPath \ "id").write[String] and
-      (JsPath \ "foreName").write[String] and
-      (JsPath \ "familyName").write[String] and
-      (JsPath \ "address").write[String] and
+    (JsPath \ "accountId").writeNullable[String] and
+      (JsPath \ "email").write[String] and
+      (JsPath \ "title").writeNullable[String] and
+      (JsPath \ "foreName").writeNullable[String] and
+      (JsPath \ "familyName").writeNullable[String] and
+      (JsPath \ "address").writeNullable[String] and
       (JsPath \ "country").write[String] and
-      (JsPath \ "province").write[String] and
-      (JsPath \ "postalCode").write[String] and
-      (JsPath \ "city").write[String] and
-      (JsPath \ "graduationYear").write[String]
+      (JsPath \ "bmaNumber").writeNullable[String] and
+      (JsPath \ "province").writeNullable[String] and
+      (JsPath \ "organisation").writeNullable[String] and
+      (JsPath \ "postalCode").writeNullable[String] and
+      (JsPath \ "city").writeNullable[String] and
+      (JsPath \ "telephone").writeNullable[String] and
+      (JsPath \ "graduationYear").writeNullable[String] and
+      (JsPath \ "specialties").writeNullable[List[String]] and
+      (JsPath \ "professions").writeNullable[List[String]]
     )(unlift(Account.unapply))
 
 }
