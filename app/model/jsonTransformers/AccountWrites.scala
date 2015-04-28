@@ -12,12 +12,12 @@ object AccountWrites {
 
   implicit val accountWrites: Writes[Account] = (
     (JsPath \ "accountId").writeNullable[String] and
-      (JsPath \ "email").write[String] and
+      (JsPath \ "email").writeNullable[String] and
       (JsPath \ "title").writeNullable[String] and
-      (JsPath \ "foreName").writeNullable[String] and
+      (JsPath \ "givenName").writeNullable[String] and
       (JsPath \ "familyName").writeNullable[String] and
       (JsPath \ "address").writeNullable[String] and
-      (JsPath \ "country").write[String] and
+      (JsPath \ "country").writeNullable[String] and
       (JsPath \ "bmaNumber").writeNullable[String] and
       (JsPath \ "province").writeNullable[String] and
       (JsPath \ "organisation").writeNullable[String] and

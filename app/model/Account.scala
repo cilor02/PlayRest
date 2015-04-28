@@ -7,12 +7,12 @@ import scala.collection.immutable.List
  */
 case class Account  (
  accountId :Option[String],
- email:String,
+ email:Option[String],
  title:Option[String],
- foreName :Option[String],
+ givenName :Option[String],
  familyName :Option[String],
  address :Option[String],
- country :String ,
+ country :Option[String] ,
  bmaNumber:Option[String] ,
  province :Option[String],
  organisation: Option[String],

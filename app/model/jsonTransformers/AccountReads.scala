@@ -11,12 +11,12 @@ object AccountReads {
 
   implicit val accountReads: Reads[Account] = (
     (JsPath \ "accountId").readNullable[String] and
-      (JsPath \ "email").read[String] and
+      (JsPath \ "email").readNullable[String] and
       (JsPath \ "title").readNullable[String] and
-      (JsPath \ "foreName").readNullable[String] and
+      (JsPath \ "givenName").readNullable[String] and
       (JsPath \ "familyName").readNullable[String] and
       (JsPath \ "address").readNullable[String] and
-      (JsPath \ "country").read[String] and
+      (JsPath \ "country").readNullable[String] and
       (JsPath \ "bmaNumber").readNullable[String] and
       (JsPath \ "province").readNullable[String] and
       (JsPath \ "organisation").readNullable[String] and

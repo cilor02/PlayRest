@@ -3,6 +3,11 @@
 # ~~~~
 
 GET     /                           controllers.Application.index()
+POST    /account                    controllers.Application.createAccount
+POST    /account/:accountId         controllers.Application.updateAccountById(accountId :String)
+GET     /accounts                   controllers.Application.accountByEmail(email :String)
+GET     /account/:accountId         controllers.Application.accountById(accountId :String)
+DELETE  /account/:accountId         controllers.Application.deleteAccountById(accountId :String)
 GET     /testJson                   controllers.Application.testJson()
 POST     /receiveJson               controllers.Application.receiveJson()
 # Map static resources from the /public folder to the /assets URL path

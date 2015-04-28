@@ -3,10 +3,16 @@ package controllers
 import com.bmj.bsi.restapi.ics.net.BSIRestIcsApi
 import com.milo.scala.adaptor.RestServiceAdaptor
 import model.Account
+import model.jsonTransformers.AccountWrites.accountWrites
+import model.jsonTransformers.AccountReads.accountReads
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
 
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{Action, Controller,Result}
+//import play.api.mvc.Results.Error
+
+import scala.util.Failure
+import scala.util.Success
 
 object Application extends Controller {
 
@@ -25,30 +31,59 @@ object Application extends Controller {
   }
 
   def accountById(id:String) = Action {
-    val account = adaptor.accountById(id)
-    Ok(Json.toJson(account))
+    adaptor.accountById(id) match {
+      case Success (success) => success match
+      {
+        case Some(acc) => Ok(Json.toJson(acc))
+        case None => Ok(Json.toJson("{\"error\":\" Account" + id + " not found \"}"))
+      }
+
+      case Failure (exp) =>  Ok(Json.toJson("{\"error\":\"" + exp.getMessage + "\"}"))
+    }
+   // Ok(Json.toJson(account match {case Some(acc) => acc case None => "{\"error\":\" Account" + id + " not found \"}"}))
   }
 
-  def updateAccountById(id:String) = Action(parse.json) {
+  def updateAccountById(accountId:String) = Action(parse.json) {
 
-    Ok(views.html.index("Hello Play Framework"))
-  }
+    request =>
+      val jsValue = request.body
+
+      val accUpdateDetails =  jsValue.as[Account]
+
+      adaptor.updateAccount (accUpdateDetails,accountId) match {
+        case Success (success) => Ok(Json.toJson(success))
+        case Failure (exp) =>  NotFound(Json.toJson("{\"error\":\"" + exp.getMessage + "\"}"))
+      }  }
 
   def deleteAccountById(id:String) = Action {
-    adaptor.deleteById(id)
-    Ok(views.html.index("Hello Play Framework"))
+    adaptor.deleteById(id) match {
+      case Success (success) => success match
+      {
+        case Some(acc) => Ok(Json.toJson(acc))
+        case None => NotFound(Json.toJson("{\"error\":\" Account" + id + " not found \"}"))
+      }
+
+      case Failure (exp) =>  InternalServerError(Json.toJson("{\"error\":\"" + exp.getMessage + "\"}"))
+    }
   }
 
   def createAccount = Action(parse.json) {
-    Ok(views.html.index("Hello Play Framework"))
+    request =>
+      val jsValue = request.body
+
+      val acc =  jsValue.as[Account]
+
+      adaptor.createNewAccount (acc) match {
+        case Success (success) => Ok(Json.toJson(acc))
+        case Failure (exp) =>  NotFound(Json.toJson("{\"error\":\"" + exp.getMessage + "\"}"))
+      }
   }
 
 
   //  def accountByEmail = Action.async {
 //    scala.concurrent.Future{("email")}.map (Ok(_))
 //  }
-  import model.jsonTransformers.AccountWrites.accountWrites
-  import model.jsonTransformers.AccountReads.accountReads
+
   def receiveJson = Action (parse.json)
   { request =>
 
@@ -65,12 +100,12 @@ import model.jsonTransformers.AccountWrites.accountWrites
  import model.jsonTransformers.AccountReads.accountReads
   def testJson = Action {
     val account = Account(Some("id1"),
-      "milori@bmj.com",
+      Some("milori@bmj.com"),
       Some("mr"),
       Some("mike"),
       Some("ilori"),
       Some("suffolk road"),
-      "UK",
+      Some("UK"),
       Some("bma001"),
       Some("essex"),
       None,

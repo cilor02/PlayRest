@@ -13,7 +13,6 @@ import com.bmj.ics.net.rest.RestIcsApi
 import com.bmj.ics.xml.PropertyName
 import com.ics.LovFileProcessor
 import model.Account
-import org.json4s.JObject
 
 import scala.util.{Failure, Try,Success}
 
@@ -41,15 +40,23 @@ class RestServiceAdaptor (icsApi: BSIRestIcsApi)
   {
     val icsSession = icsApi.createSession()
     val identities = icsApi.findIdentitiesByPropertyValue(icsSession, "emailAddress", email.toLowerCase())
+    println(identities)
     identities.asScala.filter(_.getPropertyValue("state").equalsIgnoreCase("enabled")).toList.map( convertToAccountDTO(_))
   }
 
 
-  def accountById(id:String):Option[Account]=
+  def accountById(id:String):Try[Option[Account]]=
   {
+
+  Try {
     val icsSession = icsApi.createSession()
-    val icsIdResult = icsApi.findIdentity(icsSession,new IdImpl(id)) match { case icsId @ identity => Some(icsId) case null => None}
-    icsIdResult.filter (_.getPropertyValue("state").equalsIgnoreCase("enabled")).map (convertToAccountDTO (_))
+    val icsIdResult = icsApi.findIdentity(icsSession, new IdImpl(id)) match {
+      case icsId@identity => Some(icsId)
+      case null => None
+    }
+    icsIdResult.filter(_.getPropertyValue("state").equalsIgnoreCase("enabled")).map(convertToAccountDTO(_))
+  }
+
   }
 
 
@@ -67,12 +74,6 @@ class RestServiceAdaptor (icsApi: BSIRestIcsApi)
           throw new RestAPIResourceNotFoundException("Id " + id
             + " cannot be found.")
         }
-
-        id.setProperty("state","disabled")
-
-
-        println("id -----------" + id.getPropertyValue("state"))
-
 
         icsApi.deleteIndividualIdentity(icsSession,id)
       }
@@ -240,9 +241,11 @@ class RestServiceAdaptor (icsApi: BSIRestIcsApi)
 
       val icsProfFields = accountImmutable.professions.map(_.zipWithIndex.flatMap(x => lovFileProcessor.processProfession(x._1, x._2)))
       icsProfFields.foreach(_.foreach(p => identity.setProperty(p._1, p._2)))
+      println("****************")
+      println(identity)
+      println("****************")
 
       identity
-      //println(identity)
 
 
     }
@@ -272,18 +275,19 @@ class RestServiceAdaptor (icsApi: BSIRestIcsApi)
 
       Account(
         isNulls(id.getId.getValue)(),
+        isNulls(id.getPropertyValue("emailAddress/0"))(),
         isNulls(id.getPropertyValue("titlePrefix"))(),
         isNulls(id.getPropertyValue("forename"))(),
         isNulls(id.getPropertyValue("familyName"))(),
-        isNulls(id.getPropertyValue("emailAddress/0"))(),
         address,
         //isNulls(id.getPropertyValue("address1/0") + id.getPropertyValue("address2/0") + id.getPropertyValue("address3/0") + id.getPropertyValue("address4/0"))(),
-        isNulls(id.getPropertyValue("bmaMemberNumber"))(),
         isNulls(id.getPropertyValue("country/0"))(),
-        isNulls(id.getPropertyValue("town/0"))(),
+        isNulls(id.getPropertyValue("bmaMemberNumber"))(),
         isNulls(id.getPropertyValue("county/0"))(),
         isNulls(id.getPropertyValue("placeOfWork"))(),
         isNulls(id.getPropertyValue("postcode/0"))(),
+        isNulls(id.getPropertyValue("town/0"))(),
+
         isNulls(id.getPropertyValue("phoneDirect/0"))(),
         isNulls(id.getPropertyValue("qualificationDate"))(),
         isListNulls(specialties)(),
