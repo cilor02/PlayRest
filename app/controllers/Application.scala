@@ -7,6 +7,7 @@ import model.jsonTransformers.AccountWrites.accountWrites
 import model.jsonTransformers.AccountReads.accountReads
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
+import com.bmj.bsi.restapi.exception.{RestAPIBadParameterException, RestAPIResourceNotFoundException}
 
 import play.api.mvc.{Action, Controller,Result}
 //import play.api.mvc.Results.Error
@@ -16,13 +17,22 @@ import scala.util.Success
 
 object Application extends Controller {
 
-  val ics = new BSIRestIcsApi("ics.internal.bmjgroup.com", 6700)
+  val hostUrl = play.Play.application.configuration.getString("host.url")
+  val hostPort = play.Play.application.configuration.getString("host.port")
+  //println(hostUrl)
+  //println(hostPort)
+  val ics = new BSIRestIcsApi(hostUrl, hostPort.toInt)
   val adaptor = new RestServiceAdaptor(ics)
 
   def index = Action {
     Ok(views.html.index("Hello Play Framework"))
   }
 
+  val exceptionHandler : PartialFunction[Throwable, Result] =
+  { case exp:RestAPIResourceNotFoundException => NotFound(Json.toJson("{\"error\":\"" + exp.getMessage + "\"}"))
+    case exp:RestAPIBadParameterException => BadRequest(Json.toJson("{\"error\":\"" + exp.getMessage + "\"}"))
+    case exp:Exception => InternalServerError(Json.toJson("{\"error\":\"" + exp.getMessage + "\"}"))
+  }
 
   def accountByEmail(email:String) = Action {
 
@@ -38,7 +48,7 @@ object Application extends Controller {
         case None => Ok(Json.toJson("{\"error\":\" Account" + id + " not found \"}"))
       }
 
-      case Failure (exp) =>  Ok(Json.toJson("{\"error\":\"" + exp.getMessage + "\"}"))
+      case Failure (exp) =>  exceptionHandler(exp)
     }
    // Ok(Json.toJson(account match {case Some(acc) => acc case None => "{\"error\":\" Account" + id + " not found \"}"}))
   }
@@ -52,7 +62,7 @@ object Application extends Controller {
 
       adaptor.updateAccount (accUpdateDetails,accountId) match {
         case Success (success) => Ok(Json.toJson(success))
-        case Failure (exp) =>  NotFound(Json.toJson("{\"error\":\"" + exp.getMessage + "\"}"))
+        case Failure (exp) =>  exceptionHandler(exp)
       }  }
 
   def deleteAccountById(id:String) = Action {
@@ -63,7 +73,7 @@ object Application extends Controller {
         case None => NotFound(Json.toJson("{\"error\":\" Account" + id + " not found \"}"))
       }
 
-      case Failure (exp) =>  InternalServerError(Json.toJson("{\"error\":\"" + exp.getMessage + "\"}"))
+      case Failure (exp) =>  exceptionHandler(exp)
     }
   }
 
@@ -75,7 +85,8 @@ object Application extends Controller {
 
       adaptor.createNewAccount (acc) match {
         case Success (success) => Ok(Json.toJson(acc))
-        case Failure (exp) =>  NotFound(Json.toJson("{\"error\":\"" + exp.getMessage + "\"}"))
+        case Failure (exp) => exceptionHandler(exp)
+        //case Failure (exp) =>  NotFound(Json.toJson("{\"error\":\"" + exp.getMessage + "\"}"))
       }
   }
 

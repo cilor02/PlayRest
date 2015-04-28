@@ -21,7 +21,6 @@ import scala.util.{Failure, Try,Success}
 import scala.collection.JavaConverters._
 import scala.collection.JavaConversions.mapAsScalaMap
 
-
 /**
  * Created by milori on 27/01/2015.
  */
@@ -227,7 +226,7 @@ class RestServiceAdaptor (icsApi: BSIRestIcsApi)
       accountImmutable.address.foreach(identity.setProperty("address1/0", _))
       accountImmutable.title.foreach(identity.setProperty(PropertyName.TITLE, _))
       accountImmutable.telephone.foreach(identity.setProperty("phoneDirect/0", _))
-      accountImmutable.graduationYear.foreach(identity.setProperty("qualificationDate" + "-01-01", _))
+      accountImmutable.graduationYear.foreach(d => {identity.setProperty("qualificationDate", d + "-01-01")})
 
 
       identity.setProperty("primaryContact/0", "true")
